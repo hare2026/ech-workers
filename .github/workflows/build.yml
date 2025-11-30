@@ -2,27 +2,14 @@ name: Build Go Binary
 
 on:
   push:
+    branches: [main]
     tags: ['v*']
   pull_request:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        include:
-          - os: windows-latest
-            output: ech-win.exe
-            artifact_name: ech-windows
-          - os: ubuntu-latest
-            output: ech-linux
-            artifact_name: ech-linux
-          - os: macos-latest
-            output: ech-macos
-            artifact_name: ech-macos
-
+  build-windows:
+    runs-on: windows-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -32,18 +19,55 @@ jobs:
       with:
         go-version: '1.21'
 
-    - name: Build
-      shell: bash  # 强制使用 bash shell
-      run: |
-        go build -ldflags="-s -w" -o ${{ matrix.output }} ech-workers.go
-        # 在 Linux/macOS 上给二进制文件添加执行权限
-        if [ "${{ matrix.os }}" != "windows-latest" ]; then
-          chmod +x ${{ matrix.output }}
-        fi
+    - name: Build Windows
+      run: go build -ldflags="-s -w" -o ech-win.exe ech-workers.go
 
-    - name: Upload binary
+    - name: Upload Windows binary
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ matrix.artifact_name }}
-        path: ${{ matrix.output }}
-        retention-days: 30
+        name: ech-windows
+        path: ech-win.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Build Linux
+      run: |
+        go build -ldflags="-s -w" -o ech-linux ech-workers.go
+        chmod +x ech-linux
+
+    - name: Upload Linux binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: ech-linux
+        path: ech-linux
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21'
+
+    - name: Build macOS
+      run: |
+        go build -ldflags="-s -w" -o ech-macos ech-workers.go
+        chmod +x ech-macos
+
+    - name: Upload macOS binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: ech-macos
+        path: ech-macos
