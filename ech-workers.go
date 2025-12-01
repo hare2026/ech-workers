@@ -28,7 +28,7 @@ var (
 	token      string
 	dnsServer  string
 	echDomain  string
-	proxyIP    string // 新增：代理服务器 IP
+	proxyIP    string 
 
 	echListMu sync.RWMutex
 	echList   []byte
@@ -41,7 +41,7 @@ func init() {
 	flag.StringVar(&token, "token", "", "身份验证令牌")
 	flag.StringVar(&dnsServer, "dns", "119.29.29.29:53", "ECH 查询 DNS 服务器")
 	flag.StringVar(&echDomain, "ech", "cloudflare-ech.com", "ECH 查询域名")
-	flag.StringVar(&proxyIP, "pyip", "", "代理服务器 IP（用于 Worker 连接回退）") // 新增
+	flag.StringVar(&proxyIP, "pyip", "", "代理服务器 IP（用于 Worker 连接回退，proxyip）") 
 }
 
 func main() {
